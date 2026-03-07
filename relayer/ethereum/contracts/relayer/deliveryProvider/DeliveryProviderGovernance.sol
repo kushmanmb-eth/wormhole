@@ -48,6 +48,9 @@ abstract contract DeliveryProviderGovernance is
     }
 
     function updateWormholeRelayerImpl(address payable newAddress) internal {
+        if (newAddress == address(0)) {
+            revert AddressIsZero();
+        }
         setWormholeRelayer(newAddress);
         emit WormholeRelayerUpdated(newAddress);
     }
@@ -96,6 +99,9 @@ abstract contract DeliveryProviderGovernance is
     }
 
     function updateRewardAddressImpl(address payable newAddress) internal {
+        if (newAddress == address(0)) {
+            revert AddressIsZero();
+        }
         setRewardAddress(newAddress);
         emit RewardAddressUpdated(newAddress);
     }
@@ -282,6 +288,9 @@ abstract contract DeliveryProviderGovernance is
     function upgrade(uint16 deliveryProviderChainId, address newImplementation) public onlyOwner {
         if (deliveryProviderChainId != chainId()) {
             revert WrongChainId();
+        }
+        if (newImplementation == address(0)) {
+            revert AddressIsZero();
         }
 
         address currentImplementation = _getImplementation();

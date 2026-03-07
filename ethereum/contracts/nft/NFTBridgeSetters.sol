@@ -40,6 +40,7 @@ contract NFTBridgeSetters is NFTBridgeState {
     }
 
     function setWormhole(address wh) internal {
+        require(wh != address(0), "invalid wormhole address");
         _state.wormhole = payable(wh);
     }
 
