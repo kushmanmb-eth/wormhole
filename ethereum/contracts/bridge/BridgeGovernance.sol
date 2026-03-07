@@ -100,6 +100,7 @@ contract BridgeGovernance is BridgeGetters, BridgeSetters, ERC1967Upgrade {
     event ContractUpgraded(address indexed oldContract, address indexed newContract);
 
     function upgradeImplementation(address newImplementation) internal {
+        require(newImplementation != address(0), "new implementation is zero address");
         address currentImplementation = _getImplementation();
 
         _upgradeTo(newImplementation);

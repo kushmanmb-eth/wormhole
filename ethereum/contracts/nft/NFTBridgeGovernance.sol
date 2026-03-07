@@ -97,6 +97,7 @@ contract NFTBridgeGovernance is NFTBridgeGetters, NFTBridgeSetters, ERC1967Upgra
 
     event ContractUpgraded(address indexed oldContract, address indexed newContract);
     function upgradeImplementation(address newImplementation) internal {
+        require(newImplementation != address(0), "new implementation is zero address");
         address currentImplementation = _getImplementation();
 
         _upgradeTo(newImplementation);

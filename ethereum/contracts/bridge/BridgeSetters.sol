@@ -40,10 +40,12 @@ contract BridgeSetters is BridgeState {
     }
 
     function setWETH(address weth) internal {
+        require(weth != address(0), "invalid WETH address");
         _state.provider.WETH = weth;
     }
 
     function setWormhole(address wh) internal {
+        require(wh != address(0), "invalid wormhole address");
         _state.wormhole = payable(wh);
     }
 

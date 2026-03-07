@@ -136,6 +136,9 @@ abstract contract Governance is GovernanceStructs, Messages, Setters, ERC1967Upg
         // Obtains the recipient address to be paid transfer fees
         address payable recipient = payable(address(uint160(uint256(transfer.recipient))));
 
+        // Disallow transfers to the zero address
+        require(recipient != address(0), "recipient is zero address");
+
         // Transfers transfer fees to the recipient
         recipient.transfer(transfer.amount);
     }
@@ -172,6 +175,7 @@ abstract contract Governance is GovernanceStructs, Messages, Setters, ERC1967Upg
      * @dev Upgrades the `currentImplementation` with a `newImplementation`
      */
     function upgradeImplementation(address newImplementation) internal {
+        require(newImplementation != address(0), "new implementation is zero address");
         address currentImplementation = _getImplementation();
 
         _upgradeTo(newImplementation);
