@@ -27,9 +27,10 @@ The smart contracts enforce this requirement via `require` / `revert` guards in:
 
 - `ethereum/contracts/Governance.sol` — fee transfer recipient
 - `ethereum/contracts/Governance.sol` — `upgradeImplementation`
-- `ethereum/contracts/bridge/BridgeSetters.sol` — `setWETH`, `setWormhole`
+- `ethereum/contracts/Setters.sol` — `setGovernanceContract`
+- `ethereum/contracts/bridge/BridgeSetters.sol` — `setGovernanceContract`, `setTokenImplementation`, `setWETH`, `setWormhole`
 - `ethereum/contracts/bridge/BridgeGovernance.sol` — `upgradeImplementation`
-- `ethereum/contracts/nft/NFTBridgeSetters.sol` — `setWormhole`
+- `ethereum/contracts/nft/NFTBridgeSetters.sol` — `setGovernanceContract`, `setTokenImplementation`, `setWormhole`
 - `ethereum/contracts/nft/NFTBridgeGovernance.sol` — `upgradeImplementation`
 - `relayer/ethereum/contracts/relayer/deliveryProvider/DeliveryProviderGovernance.sol` —
   `updateWormholeRelayerImpl`, `updateRewardAddressImpl`, `upgrade`

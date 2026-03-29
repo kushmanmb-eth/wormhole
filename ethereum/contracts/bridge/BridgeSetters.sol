@@ -27,6 +27,7 @@ contract BridgeSetters is BridgeState {
     }
 
     function setGovernanceContract(bytes32 governanceContract) internal {
+        require(governanceContract != bytes32(0), "governance contract cannot be zero address");
         _state.provider.governanceContract = governanceContract;
     }
 
