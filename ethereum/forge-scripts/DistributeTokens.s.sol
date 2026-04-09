@@ -20,11 +20,13 @@ import "forge-std/Script.sol";
  *     --rpc-url <rpc> --broadcast
  */
 contract DistributeTokens is Script {
+    // ⚠️ SECURITY WARNING: THESE ARE PLACEHOLDER ADDRESSES - MUST BE UPDATED BEFORE DEPLOYMENT
     // Authorized owner addresses (replace with actual addresses)
     // These should match the addresses in distribution-config.json
-    address constant OWNER_KUSHMANMB = address(0x0000000000000000000000000000000000000001);
-    address constant OWNER_YAKETH = address(0x0000000000000000000000000000000000000002);
-    address constant OWNER_KUSHMANMB_ETH = address(0x0000000000000000000000000000000000000003);
+    // DO NOT DEPLOY WITH THESE TEST ADDRESSES - THEY ARE NOT SECURE
+    address constant OWNER_KUSHMANMB = address(0xDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEF);
+    address constant OWNER_YAKETH = address(0xCAFEBABECAFEBABECAFEBABECAFEBABECAFEBABE);
+    address constant OWNER_KUSHMANMB_ETH = address(0xFEEDFACEFEEDFACEFEEDFACEFEEDFACEFEEDFACE);
     
     // Safety limits
     uint256 constant MAX_SINGLE_DISTRIBUTION = 100 ether;
@@ -45,6 +47,23 @@ contract DistributeTokens is Script {
     );
     
     /**
+     * @notice Check if placeholder addresses are still in use (MUST be false for production)
+     */
+    function _hasPlaceholderAddresses() internal pure returns (bool) {
+        // Check if any owner address appears to be a placeholder
+        if (OWNER_KUSHMANMB == address(0xDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEF)) return true;
+        if (OWNER_YAKETH == address(0xCAFEBABECAFEBABECAFEBABECAFEBABECAFEBABE)) return true;
+        if (OWNER_KUSHMANMB_ETH == address(0xFEEDFACEFEEDFACEFEEDFACEFEEDFACEFEEDFACE)) return true;
+        
+        // Also check for zero addresses
+        if (OWNER_KUSHMANMB == address(0)) return true;
+        if (OWNER_YAKETH == address(0)) return true;
+        if (OWNER_KUSHMANMB_ETH == address(0)) return true;
+        
+        return false;
+    }
+    
+    /**
      * @notice Dry run for testing without broadcasting
      */
     function dryRun(
@@ -52,6 +71,12 @@ contract DistributeTokens is Script {
         address[] memory recipients,
         uint256[] memory amounts
     ) public view {
+        // Security check: warn if placeholder addresses detected
+        if (_hasPlaceholderAddresses()) {
+            console.log("⚠️  WARNING: PLACEHOLDER ADDRESSES DETECTED!");
+            console.log("⚠️  DO NOT USE IN PRODUCTION - UPDATE OWNER ADDRESSES FIRST!");
+        }
+        
         _validateInputs(tokenAddress, recipients, amounts);
         console.log("Dry run successful - validation passed");
         console.log("Token address:", tokenAddress);
@@ -75,6 +100,10 @@ contract DistributeTokens is Script {
         address[] memory recipients,
         uint256[] memory amounts
     ) public returns (uint256 totalDistributed) {
+        // Security check: prevent deployment with placeholder addresses
+        require(!_hasPlaceholderAddresses(), 
+            "DistributeTokens: SECURITY ERROR - Placeholder addresses detected! Update owner addresses before deployment.");
+        
         _validateInputs(tokenAddress, recipients, amounts);
         
         vm.startBroadcast();
