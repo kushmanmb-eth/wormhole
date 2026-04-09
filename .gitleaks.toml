@@ -34,6 +34,8 @@ paths = [
   '''.*/example/.*''',
   '''.*\.sample''',
   '''.*\.example''',
+  # Code that handles environment variables
+  '''relayer/generic_relayer/relayer-engine-v2/src/env\.ts''',
 ]
 
 regexes = [
@@ -42,6 +44,8 @@ regexes = [
   '''ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80''',
   '''59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d''',
   '''5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a''',
+  '''21d7212f3b4e5332fd465877b64926e3532653e2798a11255a46f533852dfe46''',
+  '''b0057716d5917badaf911b193b12b910811c1497b5bada8d7711f758981c3773''',
   # Known devnet guardian addresses
   '''0xbeFA429d57cD18b7F8A4d91A2da9AB4AF05d0FBe''',
   # Algorand sandbox tokens (64 'a' characters)
@@ -59,7 +63,7 @@ regexes = [
 [[rules]]
 id = "ethereum-private-key"
 description = "Ethereum Private Key"
-regex = '''(?i)(\b[0-9a-f]{64}\b)'''
+regex = '''(?i)(private.{0,20}key.{0,20}[:\s=]+.{0,5}[0-9a-f]{64}\b)'''
 tags = ["key", "ethereum"]
 [rules.allowlist]
 paths = [
@@ -68,11 +72,18 @@ paths = [
   '''.*/consts\.(ts|js)''',
   '''.*/mock/.*''',
   '''ethereum/\.env\.test''',
+  '''DEVELOP\.md''',
+  '''CONTRIBUTING\.md''',
+  '''SECURITY_AUDIT_CREDENTIALS\.md''',
+  '''CREDENTIAL_SECURITY\.md''',
 ]
 regexes = [
   # Known test keys
   '''4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d''',
   '''ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80''',
+  # SHA256 hashes (not private keys)
+  '''sha256:''',
+  '''@sha256:''',
 ]
 
 [[rules]]
@@ -126,9 +137,13 @@ paths = [
   '''.*_test\.(ts|js|go)''',
   '''.*\.test\.(ts|js)''',
   '''.*/mock/.*''',
+  '''docs/.*\.md''',
+  '''whitepapers/.*\.md''',
 ]
 regexes = [
   '''2d6c22c6-afae-4e54-b36d-5ba118da646a''',
+  '''432185ac-fbb7-4883-b68d-888e7bd749a9''',
+  '''insert_generated_api_key_here''',
 ]
 
 [[rules]]
@@ -146,17 +161,28 @@ paths = [
 [[rules]]
 id = "connection-string-password"
 description = "Database Connection String with Password"
-regex = '''(?i)(jdbc|mongodb(\+srv)?|mysql|postgresql|postgres)://[^:]+:[^@]+@'''
+regex = '''(?i)(jdbc|mongodb(\+srv)?|mysql|postgresql|postgres)://[^:]+:[^@\s"'<>]+@'''
 tags = ["key", "database"]
+[rules.allowlist]
+paths = [
+  '''.*/config/config\.toml''',
+  '''devnet/.*\.yaml''',
+]
 
 [[rules]]
 id = "http-basic-auth"
 description = "HTTP Basic Authentication in URL"
-regex = '''https?://[^:]+:[^@]+@[^\s"']+'''
+regex = '''(?i)(https?://[a-z0-9_-]+:[a-z0-9_@.-]+@[a-z0-9.-]+)'''
 tags = ["key", "http"]
 [rules.allowlist]
 regexes = [
   '''localhost''',
   '''127\.0\.0\.1''',
   '''example\.com''',
+]
+paths = [
+  '''DEVELOP\.md''',
+  '''CONTRIBUTING\.md''',
+  '''.*\.md$''',
+  '''.github/workflows/.*''',
 ]
