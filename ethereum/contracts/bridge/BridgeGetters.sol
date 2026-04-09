@@ -82,41 +82,41 @@ contract BridgeGetters is BridgeState {
     function isMainnetChain() public view returns (bool) {
         // Check if current chain is a mainnet based on EVM chain ID
         // Ethereum mainnet = 1, BSC mainnet = 56, Polygon mainnet = 137, etc.
-        uint256 chainId = block.chainid;
+        uint256 currentChainId = block.chainid;
         return (
-            chainId == 1 ||    // Ethereum mainnet
-            chainId == 56 ||   // BSC mainnet  
-            chainId == 137 ||  // Polygon mainnet
-            chainId == 43114 || // Avalanche mainnet
-            chainId == 250 ||  // Fantom mainnet
-            chainId == 42161 || // Arbitrum One
-            chainId == 10 ||   // Optimism mainnet
-            chainId == 8453 || // Base mainnet
-            chainId == 59144 || // Linea mainnet
-            chainId == 534352 || // Scroll mainnet
-            chainId == 81457 || // Blast mainnet
-            chainId == 5000 || // Mantle mainnet
-            chainId == 100 ||  // Gnosis Chain
-            chainId == 1284 || // Moonbeam
-            chainId == 1101 || // Polygon zkEVM
-            chainId == 42220 || // Celo mainnet
-            chainId == 1313161554 || // Aurora mainnet
-            chainId == 8217 || // Klaytn mainnet
-            chainId == 30 ||   // Rootstock mainnet
-            chainId == 686 ||  // Karura mainnet
-            chainId == 787 ||  // Acala mainnet
-            chainId == 2222 || // Kava mainnet
-            chainId == 1666600000 || // Harmony mainnet
-            chainId == 1116 || // Core mainnet
-            chainId == 42262 || // Oasis Emerald mainnet
-            chainId == 288 ||  // Boba Network
-            chainId == 324 ||  // zkSync Era
-            chainId == 34443 || // Mode mainnet
-            chainId == 480 || // World Chain mainnet
-            chainId == 7777777 || // Zora mainnet
-            chainId == 690 || // Redstone mainnet
-            chainId == 255 || // Kroma mainnet
-            chainId == 1329 // Sei mainnet
+            currentChainId == 1 ||    // Ethereum mainnet
+            currentChainId == 56 ||   // BSC mainnet  
+            currentChainId == 137 ||  // Polygon mainnet
+            currentChainId == 43114 || // Avalanche mainnet
+            currentChainId == 250 ||  // Fantom mainnet
+            currentChainId == 42161 || // Arbitrum One
+            currentChainId == 10 ||   // Optimism mainnet
+            currentChainId == 8453 || // Base mainnet
+            currentChainId == 59144 || // Linea mainnet
+            currentChainId == 534352 || // Scroll mainnet
+            currentChainId == 81457 || // Blast mainnet
+            currentChainId == 5000 || // Mantle mainnet
+            currentChainId == 100 ||  // Gnosis Chain
+            currentChainId == 1284 || // Moonbeam
+            currentChainId == 1101 || // Polygon zkEVM
+            currentChainId == 42220 || // Celo mainnet
+            currentChainId == 1313161554 || // Aurora mainnet
+            currentChainId == 8217 || // Klaytn mainnet
+            currentChainId == 30 ||   // Rootstock mainnet
+            currentChainId == 686 ||  // Karura mainnet
+            currentChainId == 787 ||  // Acala mainnet
+            currentChainId == 2222 || // Kava mainnet
+            currentChainId == 1666600000 || // Harmony mainnet
+            currentChainId == 1116 || // Core mainnet
+            currentChainId == 42262 || // Oasis Emerald mainnet
+            currentChainId == 288 ||  // Boba Network
+            currentChainId == 324 ||  // zkSync Era
+            currentChainId == 34443 || // Mode mainnet
+            currentChainId == 480 || // World Chain mainnet
+            currentChainId == 7777777 || // Zora mainnet
+            currentChainId == 690 || // Redstone mainnet
+            currentChainId == 255 || // Kroma mainnet
+            currentChainId == 1329 // Sei mainnet
         );
     }
 }
