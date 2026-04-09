@@ -1,0 +1,34 @@
+{
+  "description": "Token distribution configuration for authorized owners",
+  "WARNING": "DO NOT USE IN PRODUCTION WITHOUT UPDATING ADDRESSES - These are placeholder values",
+  "authorizedOwners": [
+    {
+      "name": "Kushmanmb",
+      "address": "0xDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEF",
+      "comment": "⚠️ PLACEHOLDER - Replace with actual Ethereum address before deployment"
+    },
+    {
+      "name": "yaketh.eth",
+      "ensName": "yaketh.eth",
+      "address": "0xCAFEBABECAFEBABECAFEBABECAFEBABECAFEBABE",
+      "comment": "⚠️ PLACEHOLDER - Resolve ENS name to Ethereum address before deployment"
+    },
+    {
+      "name": "kushmanmb.eth",
+      "ensName": "kushmanmb.eth",
+      "address": "0xFEEDFACEFEEDFACEFEEDFACEFEEDFACEFEEDFACE",
+      "comment": "⚠️ PLACEHOLDER - Resolve ENS name to Ethereum address before deployment"
+    }
+  ],
+  "distributionParameters": {
+    "dailyDistributionAmount": "1000000000000000000",
+    "maxDistributionPerAddress": "10000000000000000000",
+    "tokenDecimals": 18,
+    "comment": "Amounts are in wei (18 decimals). Adjust as needed."
+  },
+  "safetyLimits": {
+    "maxTotalSupply": "1000000000000000000000000",
+    "maxSingleDistribution": "100000000000000000000",
+    "requireMultipleConfirmations": false
+  }
+}
