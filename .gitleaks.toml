@@ -1,0 +1,162 @@
+# Gitleaks Configuration for Wormhole
+# This configuration helps prevent accidental credential leaks
+
+title = "Gitleaks Configuration for Wormhole"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Allowlist for known test/dev keys and false positives"
+paths = [
+  # Test and development key files that are intentionally committed
+  '''node/hack/query/dev.guardian.key''',
+  '''node/hack/query/querier.key''',
+  '''node/hack/accountant/dev.guardian.key''',
+  '''node/hack/accountant/dev.wormchain.key''',
+  '''node/cmd/ccq/devnet.p2p.key''',
+  '''node/cmd/ccq/devnet.signing.key''',
+  '''node/pkg/query/dev.guardian.key''',
+  # Sui test network configurations
+  '''sui/testing/sui_config/network.yaml''',
+  '''sui/devnet/network.yaml''',
+  '''sui/devnet/fullnode.yaml''',
+  # Test files
+  '''.*_test\.go''',
+  '''.*_test\.ts''',
+  '''.*\.test\.ts''',
+  '''.*\.test\.js''',
+  '''.*/test/.*''',
+  '''.*/tests/.*''',
+  '''.*/testing/.*''',
+  # Mock and example files
+  '''.*/mock/.*''',
+  '''.*/example/.*''',
+  '''.*\.sample''',
+  '''.*\.example''',
+]
+
+regexes = [
+  # Known test private keys - Anvil default accounts
+  '''4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d''',
+  '''ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80''',
+  '''59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d''',
+  '''5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a''',
+  # Known devnet guardian addresses
+  '''0xbeFA429d57cD18b7F8A4d91A2da9AB4AF05d0FBe''',
+  # Algorand sandbox tokens (64 'a' characters)
+  '''aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa''',
+  # Test Solana tokens
+  '''2WDq7wSs9zYrpx2kbHDA4RUTRch2CCTP6ZWaH4GNfnQQ''',
+  '''BVxyYhm498L79r4HMQ9sxZ5bi41DmJmeWZ7SCS7Cyvna''',
+  # Test UUID API keys
+  '''2d6c22c6-afae-4e54-b36d-5ba118da646a''',
+  # Sui deployer test key
+  '''AGA20wtGcwbcNAG4nwapbQ5wIuXwkYQEWFUoSVAxctHb''',
+]
+
+# Custom rules specific to blockchain development
+[[rules]]
+id = "ethereum-private-key"
+description = "Ethereum Private Key"
+regex = '''(?i)(\b[0-9a-f]{64}\b)'''
+tags = ["key", "ethereum"]
+[rules.allowlist]
+paths = [
+  '''.*_test\.(ts|js|go)''',
+  '''.*\.test\.(ts|js)''',
+  '''.*/consts\.(ts|js)''',
+  '''.*/mock/.*''',
+  '''ethereum/\.env\.test''',
+]
+regexes = [
+  # Known test keys
+  '''4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d''',
+  '''ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80''',
+]
+
+[[rules]]
+id = "aws-access-key"
+description = "AWS Access Key ID"
+regex = '''(A3T[A-Z0-9]|AKIA|AGPA|AIDA|AROA|AIPA|ANPA|ANVA|ASIA)[A-Z0-9]{16}'''
+tags = ["key", "aws"]
+[rules.allowlist]
+paths = [
+  '''sui/testing/sui_config/network.yaml''',
+  '''sui/devnet/network.yaml''',
+]
+
+[[rules]]
+id = "github-pat"
+description = "GitHub Personal Access Token"
+regex = '''ghp_[0-9a-zA-Z]{36}'''
+tags = ["key", "github"]
+
+[[rules]]
+id = "github-oauth"
+description = "GitHub OAuth Token"
+regex = '''gho_[0-9a-zA-Z]{36}'''
+tags = ["key", "github"]
+
+[[rules]]
+id = "github-app-token"
+description = "GitHub App Token"
+regex = '''(ghu|ghs)_[0-9a-zA-Z]{36}'''
+tags = ["key", "github"]
+
+[[rules]]
+id = "slack-token"
+description = "Slack Token"
+regex = '''xox[baprs]-([0-9a-zA-Z]{10,48})'''
+tags = ["key", "slack"]
+
+[[rules]]
+id = "slack-webhook"
+description = "Slack Webhook"
+regex = '''https://hooks\.slack\.com/services/T[a-zA-Z0-9_]{8}/B[a-zA-Z0-9_]{8}/[a-zA-Z0-9_]{24}'''
+tags = ["key", "slack"]
+
+[[rules]]
+id = "generic-api-key"
+description = "Generic API Key"
+regex = '''(?i)(api[_-]?key|apikey|api[_-]?secret)['":\s=]+([0-9a-zA-Z\-_]{20,})'''
+tags = ["key", "api"]
+[rules.allowlist]
+paths = [
+  '''.*_test\.(ts|js|go)''',
+  '''.*\.test\.(ts|js)''',
+  '''.*/mock/.*''',
+]
+regexes = [
+  '''2d6c22c6-afae-4e54-b36d-5ba118da646a''',
+]
+
+[[rules]]
+id = "private-key-header"
+description = "Private Key File Header"
+regex = '''-----BEGIN (RSA |EC |OPENSSH |DSA |PGP )?PRIVATE KEY-----'''
+tags = ["key", "private"]
+[rules.allowlist]
+paths = [
+  '''node/hack/.*\.key''',
+  '''node/cmd/ccq/.*\.key''',
+  '''node/pkg/query/.*\.key''',
+]
+
+[[rules]]
+id = "connection-string-password"
+description = "Database Connection String with Password"
+regex = '''(?i)(jdbc|mongodb(\+srv)?|mysql|postgresql|postgres)://[^:]+:[^@]+@'''
+tags = ["key", "database"]
+
+[[rules]]
+id = "http-basic-auth"
+description = "HTTP Basic Authentication in URL"
+regex = '''https?://[^:]+:[^@]+@[^\s"']+'''
+tags = ["key", "http"]
+[rules.allowlist]
+regexes = [
+  '''localhost''',
+  '''127\.0\.0\.1''',
+  '''example\.com''',
+]
