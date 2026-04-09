@@ -49,6 +49,42 @@ contract Bridge is BridgeGovernance, ReentrancyGuard {
         uint64 indexed sequence
     );
 
+    /**
+     * @notice Emitted when tokens are sent out from this chain (outgoing transfer).
+     * @dev This event provides comprehensive tracking for customer support and recovery.
+     * @param sender Address that initiated the transfer.
+     * @param token Address of the token being transferred.
+     * @param amount Amount of tokens transferred (normalized to 8 decimals).
+     * @param recipientChain Target chain ID.
+     * @param recipient Recipient address on target chain (bytes32 zero-left-padded).
+     * @param sequence Sequence number of the Wormhole message.
+     * @param transferHash Unique hash identifying this transfer.
+     */
+    event TokensLocked(
+        address indexed sender,
+        address indexed token,
+        uint256 amount,
+        uint16 recipientChain,
+        bytes32 recipient,
+        uint64 indexed sequence,
+        bytes32 transferHash
+    );
+
+    /**
+     * @notice Emitted when tokens are recovered by emergency recovery mechanism.
+     * @dev Only emitted when stuck tokens are recovered through governance.
+     * @param token Address of the token recovered.
+     * @param recipient Address receiving the recovered tokens.
+     * @param amount Amount of tokens recovered.
+     * @param reason Brief description of why recovery was needed.
+     */
+    event TokensRecovered(
+        address indexed token,
+        address indexed recipient,
+        uint256 amount,
+        string reason
+    );
+
     /*
      *  @dev Produce a AssetMeta message for a given token
      */
@@ -338,10 +374,30 @@ contract Bridge is BridgeGovernance, ReentrancyGuard {
             fee: fee
         });
 
+        bytes memory encoded = encodeTransfer(transfer);
         sequence = wormhole().publishMessage{value: callValue}(
             nonce,
-            encodeTransfer(transfer),
+            encoded,
             finality()
+        );
+
+        // Emit tracking event for customer support and recovery
+        bytes32 transferHash = keccak256(abi.encodePacked(
+            block.chainid,
+            chainId(),
+            sequence,
+            tokenAddress,
+            recipient
+        ));
+        
+        emit TokensLocked(
+            msg.sender,
+            tokenChain == chainId() ? address(uint160(uint256(tokenAddress))) : wrappedAsset(tokenChain, tokenAddress),
+            amount,
+            recipientChain,
+            recipient,
+            sequence,
+            transferHash
         );
     }
 
@@ -372,10 +428,30 @@ contract Bridge is BridgeGovernance, ReentrancyGuard {
                 payload: payload
             });
 
+        bytes memory encoded = encodeTransferWithPayload(transfer);
         sequence = wormhole().publishMessage{value: callValue}(
             nonce,
-            encodeTransferWithPayload(transfer),
+            encoded,
             finality()
+        );
+
+        // Emit tracking event for customer support and recovery
+        bytes32 transferHash = keccak256(abi.encodePacked(
+            block.chainid,
+            chainId(),
+            sequence,
+            tokenAddress,
+            recipient
+        ));
+        
+        emit TokensLocked(
+            msg.sender,
+            tokenChain == chainId() ? address(uint160(uint256(tokenAddress))) : wrappedAsset(tokenChain, tokenAddress),
+            amount,
+            recipientChain,
+            recipient,
+            sequence,
+            transferHash
         );
     }
 

@@ -123,4 +123,21 @@ contract BridgeStructs {
         // Authorization status (true = authorized, false = unauthorized)
         bool authorized;
     }
+
+    struct RecoverTokens {
+        // Governance Header
+        // module: "TokenBridge" left-padded
+        bytes32 module;
+        // governance action: 5
+        uint8 action;
+        // governance packet chain id
+        uint16 chainId;
+
+        // Token address to recover
+        address token;
+        // Recipient address
+        address recipient;
+        // Amount to recover
+        uint256 amount;
+    }
 }

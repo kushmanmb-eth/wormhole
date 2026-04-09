@@ -119,4 +119,24 @@ contract BridgeGetters is BridgeState {
             currentChainId == 1329 // Sei mainnet
         );
     }
+
+    /**
+     * @notice Get bridge balance for tracking purposes.
+     * @dev Useful for customer support to verify bridge state.
+     * @param token The token address to check.
+     * @return The balance of tokens held by this bridge contract.
+     */
+    function getBridgeBalance(address token) public view returns (uint256) {
+        return IERC20(token).balanceOf(address(this));
+    }
+
+    /**
+     * @notice Check the outstanding bridged amount for a native token.
+     * @dev This helps track how many tokens are locked on this chain vs circulating on other chains.
+     * @param token The native token address.
+     * @return The amount of tokens bridged out to other chains (normalized to 8 decimals).
+     */
+    function getOutstandingBridged(address token) public view returns (uint256) {
+        return outstandingBridged(token);
+    }
 }

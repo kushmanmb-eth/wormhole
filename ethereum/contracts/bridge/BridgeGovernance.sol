@@ -222,4 +222,52 @@ contract BridgeGovernance is BridgeGetters, BridgeSetters, ERC1967Upgrade {
 
         require(encoded.length == index, "wrong length");
     }
+
+    // Execute a RecoverTokens governance message
+    function recoverTokensFromGovernance(bytes memory encodedVM) public {
+        (IWormhole.VM memory vm, bool valid, string memory reason) = verifyGovernanceVM(encodedVM);
+        require(valid, reason);
+
+        setGovernanceActionConsumed(vm.hash);
+
+        BridgeStructs.RecoverTokens memory recovery = parseRecoverTokens(vm.payload);
+
+        require((recovery.chainId == chainId() && !isFork()) || recovery.chainId == 0, "invalid chain id");
+        require(recovery.token != address(0), "invalid token address");
+        require(recovery.recipient != address(0), "invalid recipient address");
+        require(recovery.amount > 0, "invalid amount");
+
+        // Transfer the tokens to the recipient
+        SafeERC20.safeTransfer(IERC20(recovery.token), recovery.recipient, recovery.amount);
+
+        // Emit recovery event for tracking
+        emit TokensRecovered(recovery.token, recovery.recipient, recovery.amount, "Governance-initiated recovery");
+    }
+
+    /// @dev Parse a recoverTokens (action 5) with minimal validation
+    function parseRecoverTokens(bytes memory encoded) public pure returns (BridgeStructs.RecoverTokens memory recovery) {
+        uint index = 0;
+
+        recovery.module = encoded.toBytes32(index);
+        index += 32;
+        require(recovery.module == module, "wrong module");
+
+        recovery.action = encoded.toUint8(index);
+        index += 1;
+        require(recovery.action == 5, "wrong action");
+
+        recovery.chainId = encoded.toUint16(index);
+        index += 2;
+
+        recovery.token = address(uint160(uint256(encoded.toBytes32(index))));
+        index += 32;
+
+        recovery.recipient = address(uint160(uint256(encoded.toBytes32(index))));
+        index += 32;
+
+        recovery.amount = encoded.toUint256(index);
+        index += 32;
+
+        require(encoded.length == index, "wrong length");
+    }
 }
