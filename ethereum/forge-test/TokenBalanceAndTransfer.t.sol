@@ -136,6 +136,24 @@ contract TokenBalanceAndTransferTest is Test {
         assertEq(token1.balanceOf(recipient), initialRecipientBalance + 100 ether);
     }
     
+    function testTransferWhenAuthorizedIsTrue() public {
+        // This is a clearer positive test for authorized transfers
+        script.setKushmanmbAuthorization(true);
+        
+        // Give script some tokens to transfer
+        token1.transfer(address(script), 500 ether);
+        
+        uint256 recipientBalanceBefore = token1.balanceOf(recipient);
+        
+        // Execute transfer from script context
+        vm.prank(address(script));
+        script.transferTokens(address(token1), recipient, 500 ether);
+        
+        // Verify transfer succeeded
+        assertEq(token1.balanceOf(recipient), recipientBalanceBefore + 500 ether);
+        assertEq(token1.balanceOf(address(script)), 0);
+    }
+    
     function testAuthorizationFlagPreventsTransfer() public {
         // Start with authorization = false
         script.setKushmanmbAuthorization(false);

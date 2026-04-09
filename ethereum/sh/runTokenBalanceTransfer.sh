@@ -69,14 +69,6 @@ echo ""
 # Prepare token array
 TOKEN_ARRAY="[$TOKEN1,$TOKEN2,$TOKEN3,$TOKEN4,$TOKEN5]"
 
-# Determine which key to use
-AUTH_ARG=""
-if [[ -n ${PRIVATE_KEY:-} ]]; then
-    AUTH_ARG="--private-key $PRIVATE_KEY"
-else
-    AUTH_ARG="--mnemonic-path <(echo \"$MNEMONIC\")"
-fi
-
 # Run the forge script
 if [[ -n ${PRIVATE_KEY:-} ]]; then
     forge script ./forge-scripts/TokenBalanceAndTransfer.s.sol:TokenBalanceAndTransfer \
