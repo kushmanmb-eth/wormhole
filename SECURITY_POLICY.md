@@ -229,10 +229,12 @@ While blacklists are intended to be permanent, we recognize that errors can occu
 
 ## PGP Public Key
 
-Our PGP public key for encrypted communications is available at:
+Our PGP public key for encrypted communications will be available at:
 https://wormhole.com/security/pgp-key.asc
 
-Fingerprint: `[To be added]`
+*Note: PGP key distribution is being set up. For now, you can send encrypted emails using standard S/MIME or contact us for our current key.*
+
+Fingerprint: `Pending - Contact security@wormhole.com for current key`
 
 ---
 

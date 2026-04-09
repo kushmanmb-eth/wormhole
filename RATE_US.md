@@ -4,7 +4,9 @@ Thank you for using Wormhole, the leading cross-chain messaging protocol! Your f
 
 ## Quick Rating
 
-⭐ **Rate your experience**: [Click here to rate Wormhole](https://forms.gle/wormhole-rating)
+⭐ **Rate your experience**: [Click here to rate Wormhole](https://github.com/wormhole-foundation/wormhole) (Star our GitHub repository)
+
+*Note: Dedicated feedback form coming soon. For now, please use GitHub stars, issues, or contact us directly.*
 
 ## How to Provide Feedback
 
