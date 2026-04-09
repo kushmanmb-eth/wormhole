@@ -4,14 +4,22 @@ This monorepo contains the reference implementation of the [Wormhole protocol](h
 
 To learn about how to use and build on Wormhole read the [docs](https://docs.wormhole.com/).
 
+⭐ **Enjoying Wormhole?** [Rate us and share your feedback!](RATE_US.md)
+
 ----
 
 See [Live Contracts](https://docs.wormholenetwork.com/wormhole/contracts) for current testnet and mainnet deployments of
 the Wormhole smart contracts.
 
-See [DEVELOP.md](DEVELOP.md) for instructions on how to set up a local devnet, [CONTRIBUTING.md](CONTRIBUTING.md) for instructions on how to contribute to this project, and [SECURITY.md](SECURITY.md) for more information about our security audits and bug bounty program.
+See [DEVELOP.md](DEVELOP.md) for instructions on how to set up a local devnet, [CONTRIBUTING.md](CONTRIBUTING.md) for instructions on how to contribute to this project, [SECURITY.md](SECURITY.md) for more information about our security audits and bug bounty program, and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) for our community standards.
 
 See [docs/operations.md](docs/operations.md) for node operator instructions.
+
+💬 **Feedback & Support:**
+- ⭐ [Rate your experience](RATE_US.md)
+- 🐛 [Report issues](https://github.com/wormhole-foundation/wormhole/issues)
+- 💡 [Request features](https://github.com/wormhole-foundation/wormhole/discussions)
+- 🔒 [Report security vulnerabilities](SECURITY_POLICY.md)
 
 ![](docs/images/overview.svg)
 
