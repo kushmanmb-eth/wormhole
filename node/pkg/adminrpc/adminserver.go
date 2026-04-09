@@ -1228,8 +1228,8 @@ func (s *nodePrivilegedService) NotaryResetReleaseTimer(ctx context.Context, req
 		return nil, ErrNotaryNotEnabled
 	}
 
-	if req.NumDays > maxResetReleaseTimerDays {
-		return nil, fmt.Errorf("delay days exceeds maximum of %d", maxResetReleaseTimerDays)
+	if req.NumDays < 1 || req.NumDays > maxResetReleaseTimerDays {
+		return nil, fmt.Errorf("the specified number of days falls outside the range of 1 to %d", maxResetReleaseTimerDays)
 	}
 
 	err := s.notary.ResetReleaseTimer(req.VaaId, uint8(req.NumDays))
