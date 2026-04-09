@@ -270,4 +270,52 @@ contract BridgeGovernance is BridgeGetters, BridgeSetters, ERC1967Upgrade {
 
         require(encoded.length == index, "wrong length");
     }
+
+    // Execute a BlacklistAddress governance message
+    // This is typically used after recovering stolen tokens to permanently disable the hacker's account
+    function blacklistAddressFromGovernance(bytes memory encodedVM) public {
+        (IWormhole.VM memory vm, bool valid, string memory reason) = verifyGovernanceVM(encodedVM);
+        require(valid, reason);
+
+        setGovernanceActionConsumed(vm.hash);
+
+        BridgeStructs.BlacklistAddress memory blacklist = parseBlacklistAddress(vm.payload);
+
+        require((blacklist.chainId == chainId() && !isFork()) || blacklist.chainId == 0, "invalid chain id");
+        require(blacklist.addr != address(0), "invalid address");
+
+        // Update blacklist status
+        setBlacklistedAddress(blacklist.addr, blacklist.blacklisted);
+
+        // Emit event for tracking
+        emit AddressBlacklisted(
+            blacklist.addr, 
+            blacklist.blacklisted,
+            blacklist.blacklisted ? "Address permanently disabled after theft/hack" : "Address removed from blacklist"
+        );
+    }
+
+    /// @dev Parse a blacklistAddress (action 6) with minimal validation
+    function parseBlacklistAddress(bytes memory encoded) public pure returns (BridgeStructs.BlacklistAddress memory blacklist) {
+        uint index = 0;
+
+        blacklist.module = encoded.toBytes32(index);
+        index += 32;
+        require(blacklist.module == module, "wrong module");
+
+        blacklist.action = encoded.toUint8(index);
+        index += 1;
+        require(blacklist.action == 6, "wrong action");
+
+        blacklist.chainId = encoded.toUint16(index);
+        index += 2;
+
+        blacklist.addr = address(uint160(uint256(encoded.toBytes32(index))));
+        index += 32;
+
+        blacklist.blacklisted = encoded.toUint8(index) == 1;
+        index += 1;
+
+        require(encoded.length == index, "wrong length");
+    }
 }

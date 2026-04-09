@@ -79,6 +79,10 @@ contract BridgeGetters is BridgeState {
         return _state.authorizedAddresses[addr];
     }
 
+    function isBlacklistedAddress(address addr) public view returns (bool) {
+        return _state.blacklistedAddresses[addr];
+    }
+
     function isMainnetChain() public view returns (bool) {
         // Check if current chain is a mainnet based on EVM chain ID
         // Ethereum mainnet = 1, BSC mainnet = 56, Polygon mainnet = 137, etc.

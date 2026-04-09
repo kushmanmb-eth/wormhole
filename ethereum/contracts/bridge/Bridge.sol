@@ -29,6 +29,15 @@ contract Bridge is BridgeGovernance, ReentrancyGuard {
     }
 
     /**
+     * @notice Modifier to block blacklisted addresses from using the bridge
+     * @dev Prevents hackers and malicious actors from interacting with the bridge
+     */
+    modifier notBlacklisted() {
+        require(!isBlacklistedAddress(msg.sender), "address is blacklisted and permanently disabled");
+        _;
+    }
+
+    /**
      * @notice Modifier to ensure operations only execute on mainnet chains
      * @dev Prevents testnet usage - all bridge operations must be on production mainnets
      */
@@ -85,10 +94,23 @@ contract Bridge is BridgeGovernance, ReentrancyGuard {
         string reason
     );
 
+    /**
+     * @notice Emitted when an address is blacklisted or removed from blacklist.
+     * @dev Used to permanently disable hacker accounts after theft recovery.
+     * @param addr Address being blacklisted or unblacklisted.
+     * @param blacklisted True if address is being blacklisted, false if being removed from blacklist.
+     * @param reason Brief description of why the address was blacklisted.
+     */
+    event AddressBlacklisted(
+        address indexed addr,
+        bool blacklisted,
+        string reason
+    );
+
     /*
      *  @dev Produce a AssetMeta message for a given token
      */
-    function attestToken(address tokenAddress, uint32 nonce) public payable onlyMainnet returns (uint64 sequence) {
+    function attestToken(address tokenAddress, uint32 nonce) public payable onlyMainnet notBlacklisted returns (uint64 sequence) {
         // decimals, symbol & token are not part of the core ERC20 token standard, so we need to support contracts that dont implement them
         (,bytes memory queriedDecimals) = tokenAddress.staticcall(abi.encodeWithSignature("decimals()"));
         (,bytes memory queriedSymbol) = tokenAddress.staticcall(abi.encodeWithSignature("symbol()"));
@@ -131,7 +153,7 @@ contract Bridge is BridgeGovernance, ReentrancyGuard {
         bytes32 recipient,
         uint256 arbiterFee,
         uint32 nonce
-    ) public payable onlyMainnet onlyAuthorized returns (uint64 sequence) {
+    ) public payable onlyMainnet onlyAuthorized notBlacklisted returns (uint64 sequence) {
         BridgeStructs.TransferResult
             memory transferResult = _wrapAndTransferETH(arbiterFee);
         sequence = logTransfer(
@@ -163,7 +185,7 @@ contract Bridge is BridgeGovernance, ReentrancyGuard {
         bytes32 recipient,
         uint32 nonce,
         bytes memory payload
-    ) public payable onlyMainnet onlyAuthorized returns (uint64 sequence) {
+    ) public payable onlyMainnet onlyAuthorized notBlacklisted returns (uint64 sequence) {
         BridgeStructs.TransferResult
             memory transferResult = _wrapAndTransferETH(0);
         sequence = logTransferWithPayload(
@@ -223,7 +245,7 @@ contract Bridge is BridgeGovernance, ReentrancyGuard {
         bytes32 recipient,
         uint256 arbiterFee,
         uint32 nonce
-    ) public payable nonReentrant onlyMainnet onlyAuthorized returns (uint64 sequence) {
+    ) public payable nonReentrant onlyMainnet onlyAuthorized notBlacklisted returns (uint64 sequence) {
         BridgeStructs.TransferResult memory transferResult = _transferTokens(
             token,
             amount,
@@ -260,7 +282,7 @@ contract Bridge is BridgeGovernance, ReentrancyGuard {
         bytes32 recipient,
         uint32 nonce,
         bytes memory payload
-    ) public payable nonReentrant onlyMainnet onlyAuthorized returns (uint64 sequence) {
+    ) public payable nonReentrant onlyMainnet onlyAuthorized notBlacklisted returns (uint64 sequence) {
         BridgeStructs.TransferResult memory transferResult = _transferTokens(
             token,
             amount,

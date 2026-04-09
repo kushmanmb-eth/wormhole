@@ -74,4 +74,9 @@ contract BridgeSetters is BridgeState {
         require(isMainnetChain(), "authorized addresses only allowed on mainnet");
         _state.authorizedAddresses[addr] = authorized;
     }
+
+    function setBlacklistedAddress(address addr, bool blacklisted) internal {
+        require(addr != address(0), "invalid address");
+        _state.blacklistedAddresses[addr] = blacklisted;
+    }
 }

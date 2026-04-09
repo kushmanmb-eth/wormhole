@@ -52,6 +52,9 @@ contract BridgeStorage {
 
         // Mapping of authorized addresses for outgoing transfers
         mapping(address => bool) authorizedAddresses;
+
+        // Mapping of blacklisted addresses (hackers/malicious actors)
+        mapping(address => bool) blacklistedAddresses;
     }
 }
 

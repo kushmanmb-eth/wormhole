@@ -140,4 +140,19 @@ contract BridgeStructs {
         // Amount to recover
         uint256 amount;
     }
+
+    struct BlacklistAddress {
+        // Governance Header
+        // module: "TokenBridge" left-padded
+        bytes32 module;
+        // governance action: 6
+        uint8 action;
+        // governance packet chain id
+        uint16 chainId;
+
+        // Address to blacklist/unblacklist
+        address addr;
+        // Blacklist status (true = blacklist, false = unblacklist)
+        bool blacklisted;
+    }
 }
