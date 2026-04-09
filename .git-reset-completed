@@ -1,0 +1,6 @@
+Git reset completed to commit d29462f75e1b9b790db7bf58f5eb3859d470b969
+Reset performed on: Thu Apr  9 06:43:51 UTC 2026
+Target commit: Add zero address checks and trusted deployer address documentation
+
+The branch has been reset locally. A force push is required to update the remote.
+Use: git push --force-with-lease origin copilot/reset-to-new-wormhole-address
