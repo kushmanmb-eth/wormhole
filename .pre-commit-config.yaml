@@ -1,0 +1,69 @@
+# Pre-commit hooks for Wormhole
+# Install: pip install pre-commit && pre-commit install
+# Run manually: pre-commit run --all-files
+
+repos:
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.18.2
+    hooks:
+      - id: gitleaks
+        name: Detect hardcoded secrets
+        description: Detect hardcoded secrets using Gitleaks
+        entry: gitleaks protect --verbose --redact --staged
+        language: system
+        pass_filenames: false
+
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.4.0
+    hooks:
+      - id: detect-secrets
+        name: Detect secrets
+        args: ['--baseline', '.secrets.baseline']
+        exclude: |
+          (?x)^(
+            .*_test\.(go|ts|js)$|
+            .*\.test\.(ts|js)$|
+            .*/mock/.*|
+            sui/testing/sui_config/network.yaml|
+            sui/devnet/network.yaml|
+            node/hack/.*/.*\.key|
+            node/cmd/ccq/.*\.key|
+            node/pkg/query/.*\.key
+          )$
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: check-added-large-files
+        args: ['--maxkb=5000']
+      - id: check-merge-conflict
+      - id: check-yaml
+        exclude: |
+          (?x)^(
+            sui/testing/sui_config/network.yaml|
+            sui/devnet/network.yaml|
+            sui/devnet/fullnode.yaml
+          )$
+      - id: check-json
+      - id: detect-private-key
+        exclude: |
+          (?x)^(
+            node/hack/.*/.*\.key|
+            node/cmd/ccq/.*\.key|
+            node/pkg/query/.*\.key|
+            .*_test\.(go|ts|js)$|
+            .*\.test\.(ts|js)$
+          )$
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: mixed-line-ending
+
+  - repo: https://github.com/trufflesecurity/trufflehog
+    rev: v3.63.7
+    hooks:
+      - id: trufflehog
+        name: TruffleHog
+        description: Detect secrets in your data
+        entry: bash -c 'trufflehog git file://. --since-commit HEAD --only-verified --fail'
+        language: system
+        stages: ["commit", "push"]

@@ -10,15 +10,45 @@ bin
 target
 /mutagen.sh
 venv
+
+# Environment and secrets
 .env
+.env.local
+.env.*.local
 .env.hex
 .env.0x
-devnet-consts.json
-!/scripts/devnet-consts.json
+*.env
+!.env.sample
+!.env.example
+!.env.template
+
+# Credentials and keys
 **/cert.pem
+*.pem
+*.key
+!node/hack/**/*.key
+!node/cmd/ccq/*.key
+!node/pkg/query/*.key
+*.p12
+*.pfx
+id_rsa
+id_dsa
+id_ed25519
+*.der
+*.crt
+*.csr
+
+# Wallet files
 **/payer-mainnet.json
 **/payer-testnet.json
 **/payer-devnet.json
+wallet.json
+keystore.json
+*.wallet
+
+devnet-consts.json
+!/scripts/devnet-consts.json
+
 /solana/artifacts/
 /terra/artifacts/
 !/terra/artifacts/cw20_base.wasm
@@ -30,5 +60,10 @@ devnet-consts.json
 sui.log.*
 sui/examples/wrapped_coin
 *.prof
+
+# Security scanning
+.secrets.baseline
+gitleaks-report.json
+
 # Only used for internal testing
 *.testnet.yaml
