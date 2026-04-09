@@ -1,0 +1,33 @@
+{
+  "description": "Token distribution configuration for authorized owners",
+  "authorizedOwners": [
+    {
+      "name": "Kushmanmb",
+      "address": "0x0000000000000000000000000000000000000000",
+      "comment": "Replace with actual Ethereum address"
+    },
+    {
+      "name": "yaketh.eth",
+      "ensName": "yaketh.eth",
+      "address": "0x0000000000000000000000000000000000000000",
+      "comment": "Resolve ENS name to Ethereum address before deployment"
+    },
+    {
+      "name": "kushmanmb.eth",
+      "ensName": "kushmanmb.eth",
+      "address": "0x0000000000000000000000000000000000000000",
+      "comment": "Resolve ENS name to Ethereum address before deployment"
+    }
+  ],
+  "distributionParameters": {
+    "dailyDistributionAmount": "1000000000000000000",
+    "maxDistributionPerAddress": "10000000000000000000",
+    "tokenDecimals": 18,
+    "comment": "Amounts are in wei (18 decimals). Adjust as needed."
+  },
+  "safetyLimits": {
+    "maxTotalSupply": "1000000000000000000000000",
+    "maxSingleDistribution": "100000000000000000000",
+    "requireMultipleConfirmations": false
+  }
+}
