@@ -78,4 +78,45 @@ contract BridgeGetters is BridgeState {
     function isAuthorizedAddress(address addr) public view returns (bool) {
         return _state.authorizedAddresses[addr];
     }
+
+    function isMainnetChain() public view returns (bool) {
+        // Check if current chain is a mainnet based on EVM chain ID
+        // Ethereum mainnet = 1, BSC mainnet = 56, Polygon mainnet = 137, etc.
+        uint256 chainId = block.chainid;
+        return (
+            chainId == 1 ||    // Ethereum mainnet
+            chainId == 56 ||   // BSC mainnet  
+            chainId == 137 ||  // Polygon mainnet
+            chainId == 43114 || // Avalanche mainnet
+            chainId == 250 ||  // Fantom mainnet
+            chainId == 42161 || // Arbitrum One
+            chainId == 10 ||   // Optimism mainnet
+            chainId == 8453 || // Base mainnet
+            chainId == 59144 || // Linea mainnet
+            chainId == 534352 || // Scroll mainnet
+            chainId == 81457 || // Blast mainnet
+            chainId == 5000 || // Mantle mainnet
+            chainId == 100 ||  // Gnosis Chain
+            chainId == 1284 || // Moonbeam
+            chainId == 1101 || // Polygon zkEVM
+            chainId == 42220 || // Celo mainnet
+            chainId == 1313161554 || // Aurora mainnet
+            chainId == 8217 || // Klaytn mainnet
+            chainId == 30 ||   // Rootstock mainnet
+            chainId == 686 ||  // Karura mainnet
+            chainId == 787 ||  // Acala mainnet
+            chainId == 2222 || // Kava mainnet
+            chainId == 1666600000 || // Harmony mainnet
+            chainId == 1116 || // Core mainnet
+            chainId == 42262 || // Oasis Emerald mainnet
+            chainId == 288 ||  // Boba Network
+            chainId == 324 ||  // zkSync Era
+            chainId == 34443 || // Mode mainnet
+            chainId == 480 || // World Chain mainnet
+            chainId == 7777777 || // Zora mainnet
+            chainId == 690 || // Redstone mainnet
+            chainId == 255 || // Kroma mainnet
+            chainId == 1329 // Sei mainnet
+        );
+    }
 }

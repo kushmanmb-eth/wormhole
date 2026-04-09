@@ -29,6 +29,15 @@ contract Bridge is BridgeGovernance, ReentrancyGuard {
     }
 
     /**
+     * @notice Modifier to ensure operations only execute on mainnet chains
+     * @dev Prevents testnet usage - all bridge operations must be on production mainnets
+     */
+    modifier onlyMainnet() {
+        require(isMainnetChain(), "operation only allowed on mainnet");
+        _;
+    }
+
+    /**
      * @notice Emitted when a transfer is completed by the token bridge.
      * @param emitterChainId Wormhole chain ID of emitter on the source chain.
      * @param emitterAddress Address (bytes32 zero-left-padded) of emitter on the source chain.
@@ -43,7 +52,7 @@ contract Bridge is BridgeGovernance, ReentrancyGuard {
     /*
      *  @dev Produce a AssetMeta message for a given token
      */
-    function attestToken(address tokenAddress, uint32 nonce) public payable returns (uint64 sequence) {
+    function attestToken(address tokenAddress, uint32 nonce) public payable onlyMainnet returns (uint64 sequence) {
         // decimals, symbol & token are not part of the core ERC20 token standard, so we need to support contracts that dont implement them
         (,bytes memory queriedDecimals) = tokenAddress.staticcall(abi.encodeWithSignature("decimals()"));
         (,bytes memory queriedSymbol) = tokenAddress.staticcall(abi.encodeWithSignature("symbol()"));
@@ -86,7 +95,7 @@ contract Bridge is BridgeGovernance, ReentrancyGuard {
         bytes32 recipient,
         uint256 arbiterFee,
         uint32 nonce
-    ) public payable onlyAuthorized returns (uint64 sequence) {
+    ) public payable onlyMainnet onlyAuthorized returns (uint64 sequence) {
         BridgeStructs.TransferResult
             memory transferResult = _wrapAndTransferETH(arbiterFee);
         sequence = logTransfer(
@@ -118,7 +127,7 @@ contract Bridge is BridgeGovernance, ReentrancyGuard {
         bytes32 recipient,
         uint32 nonce,
         bytes memory payload
-    ) public payable onlyAuthorized returns (uint64 sequence) {
+    ) public payable onlyMainnet onlyAuthorized returns (uint64 sequence) {
         BridgeStructs.TransferResult
             memory transferResult = _wrapAndTransferETH(0);
         sequence = logTransferWithPayload(
@@ -178,7 +187,7 @@ contract Bridge is BridgeGovernance, ReentrancyGuard {
         bytes32 recipient,
         uint256 arbiterFee,
         uint32 nonce
-    ) public payable nonReentrant onlyAuthorized returns (uint64 sequence) {
+    ) public payable nonReentrant onlyMainnet onlyAuthorized returns (uint64 sequence) {
         BridgeStructs.TransferResult memory transferResult = _transferTokens(
             token,
             amount,
@@ -215,7 +224,7 @@ contract Bridge is BridgeGovernance, ReentrancyGuard {
         bytes32 recipient,
         uint32 nonce,
         bytes memory payload
-    ) public payable nonReentrant onlyAuthorized returns (uint64 sequence) {
+    ) public payable nonReentrant onlyMainnet onlyAuthorized returns (uint64 sequence) {
         BridgeStructs.TransferResult memory transferResult = _transferTokens(
             token,
             amount,

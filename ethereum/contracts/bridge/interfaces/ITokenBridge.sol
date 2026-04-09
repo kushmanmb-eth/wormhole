@@ -164,5 +164,7 @@ interface ITokenBridge {
 
     function isAuthorizedAddress(address addr) external view returns (bool);
 
+    function isMainnetChain() external view returns (bool);
+
     function setAuthorizedAddressFromGovernance(bytes memory encodedVM) external;
 }
