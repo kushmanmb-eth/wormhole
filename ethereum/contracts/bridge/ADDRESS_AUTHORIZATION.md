@@ -2,13 +2,16 @@
 
 ## Overview
 
-This feature adds address-based authorization controls to the Wormhole Token Bridge, ensuring that only explicitly authorized addresses can initiate outgoing transfers. This prevents unauthorized token transfers and provides an additional security layer.
+This feature adds address-based authorization controls to the Wormhole Token Bridge, ensuring that only explicitly authorized addresses can initiate outgoing transfers. **ALL bridge operations are restricted to mainnet chains only** - the bridge will not operate on any testnet.
 
 ## Problem Addressed
 
-**Requirement**: "Do not allow wormhole any outgoing unless explicit address true"
+**Requirement 1**: "Do not allow wormhole any outgoing unless explicit address true"
+**Requirement 2**: "Operate on mainnets only"
 
-The Token Bridge needed a mechanism to restrict who can initiate outgoing transfers (bridging tokens to other chains) to only a whitelist of approved addresses.
+The Token Bridge needed:
+1. A mechanism to restrict who can initiate outgoing transfers (bridging tokens to other chains) to only a whitelist of approved addresses
+2. Complete restriction of ALL bridge operations to mainnet chains only
 
 ## Solution
 
@@ -18,8 +21,9 @@ The solution adds:
 
 1. **State Management**: A mapping of authorized addresses in the bridge state
 2. **Authorization Modifier**: An `onlyAuthorized` modifier that checks authorization before allowing transfers
-3. **Governance Control**: A governance action (action 4) to add/remove authorized addresses
-4. **Protected Functions**: All outgoing transfer functions now require authorization
+3. **Mainnet-Only Enforcement**: An `onlyMainnet` modifier that prevents ALL operations on testnet chains
+4. **Governance Control**: A governance action (action 4) to add/remove authorized addresses
+5. **Protected Functions**: All outgoing transfer and attestation functions require both mainnet AND authorization
 
 ### Modified Contracts
 
@@ -31,10 +35,15 @@ mapping(address => bool) authorizedAddresses;
 ```
 
 #### BridgeGetters.sol
-Added getter function:
+Added getter functions:
 ```solidity
 function isAuthorizedAddress(address addr) public view returns (bool)
+function isMainnetChain() public view returns (bool)
 ```
+
+The `isMainnetChain()` function validates against 30+ mainnet chain IDs including:
+- Ethereum (1), BSC (56), Polygon (137), Avalanche (43114)
+- Arbitrum (42161), Optimism (10), Base (8453), and 23+ more
 
 #### BridgeSetters.sol
 Added setter function:
@@ -62,20 +71,30 @@ Added:
 #### Bridge.sol
 Added:
 - `onlyAuthorized` modifier: Checks if `msg.sender` is in the authorized addresses mapping
-- Applied modifier to all outgoing transfer functions:
-  - `transferTokens()`
-  - `transferTokensWithPayload()`
-  - `wrapAndTransferETH()`
-  - `wrapAndTransferETHWithPayload()`
+- `onlyMainnet` modifier: **Checks if current chain is a mainnet - rejects all testnet operations**
+- Applied both modifiers to all outgoing transfer functions:
+  - `attestToken()` - requires mainnet only
+  - `transferTokens()` - requires mainnet AND authorization
+  - `transferTokensWithPayload()` - requires mainnet AND authorization
+  - `wrapAndTransferETH()` - requires mainnet AND authorization
+  - `wrapAndTransferETHWithPayload()` - requires mainnet AND authorization
 
 #### ITokenBridge.sol
 Updated interface to include:
 - `isAuthorizedAddress(address addr)` getter
+- `isMainnetChain()` getter - **check if current chain is mainnet**
 - `setAuthorizedAddressFromGovernance(bytes memory encodedVM)` function
 - `parseSetAuthorizedAddress(bytes memory encoded)` function
 - `SetAuthorizedAddress` struct definition
 
 ## Usage
+
+### Checking If Chain Is Mainnet
+
+```solidity
+bool isMainnet = bridge.isMainnetChain();
+// Returns true only on production mainnets, false on all testnets
+```
 
 ### Checking Authorization Status
 
@@ -103,13 +122,20 @@ bridge.setAuthorizedAddressFromGovernance(encodedVM);
 
 ### Attempting Transfers
 
-**Authorized Address**:
+**On Mainnet with Authorized Address**:
 ```solidity
-// This will succeed
+// This will succeed (mainnet + authorized)
 bridge.transferTokens(tokenAddress, amount, recipientChain, recipient, fee, nonce);
 ```
 
-**Unauthorized Address**:
+**On Testnet (ANY address)**:
+```solidity
+// This will ALWAYS revert with "operation only allowed on mainnet"
+// Even if the address is authorized!
+bridge.transferTokens(tokenAddress, amount, recipientChain, recipient, fee, nonce);
+```
+
+**On Mainnet with Unauthorized Address**:
 ```solidity
 // This will revert with "sender not authorized for outgoing transfers"
 bridge.transferTokens(tokenAddress, amount, recipientChain, recipient, fee, nonce);
@@ -119,18 +145,22 @@ bridge.transferTokens(tokenAddress, amount, recipientChain, recipient, fee, nonc
 
 ### Benefits
 
-1. **Access Control**: Only pre-approved addresses can initiate outgoing transfers
-2. **Governance-Based**: Authorization changes require governance consensus
-3. **Transparent**: Authorization status is publicly queryable
-4. **Granular**: Can authorize/unauthorize individual addresses
+1. **Mainnet Only**: The bridge CANNOT operate on any testnet - all operations are blocked at contract level
+2. **Access Control**: Only pre-approved addresses can initiate outgoing transfers
+3. **Governance-Based**: Authorization changes require governance consensus
+4. **Transparent**: Both authorization and mainnet status are publicly queryable
+5. **Granular**: Can authorize/unauthorize individual addresses
+6. **Chain Validation**: Uses `block.chainid` which cannot be spoofed
 
 ### Important Notes
 
-1. **Initial State**: By default, NO addresses are authorized. They must be explicitly added via governance.
-2. **Zero Address Protection**: The zero address cannot be authorized
-3. **Governance Required**: Only governance VAAs can modify authorization status
-4. **Chain-Specific**: Authorization can be set per-chain or globally (chainId = 0)
-5. **Incoming Transfers**: This does NOT affect incoming transfers (completing transfers from other chains)
+1. **Testnet Blocked**: The bridge will NOT work on ANY testnet - all operations will revert
+2. **Initial State**: By default, NO addresses are authorized. They must be explicitly added via governance
+3. **Zero Address Protection**: The zero address cannot be authorized
+4. **Governance Required**: Only governance VAAs can modify authorization status
+5. **Chain-Specific**: Authorization can be set per-chain or globally (chainId = 0)
+6. **Incoming Transfers**: This does NOT affect incoming transfers (completing transfers from other chains)
+7. **Mainnet List**: Currently supports 30+ mainnet chains (Ethereum, BSC, Polygon, etc.)
 
 ## Migration
 
