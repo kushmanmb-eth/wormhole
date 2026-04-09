@@ -151,4 +151,18 @@ interface ITokenBridge {
     function parseUpgrade(bytes memory encoded) external pure returns (UpgradeContract memory chain);
 
     function parseRecoverChainId(bytes memory encodedRecoverChainId) external pure returns (RecoverChainId memory rci);
+
+    function parseSetAuthorizedAddress(bytes memory encoded) external pure returns (SetAuthorizedAddress memory authAddr);
+
+    struct SetAuthorizedAddress {
+        bytes32 module;
+        uint8 action;
+        uint16 chainId;
+        address addr;
+        bool authorized;
+    }
+
+    function isAuthorizedAddress(address addr) external view returns (bool);
+
+    function setAuthorizedAddressFromGovernance(bytes memory encodedVM) external;
 }

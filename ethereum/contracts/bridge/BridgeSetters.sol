@@ -67,4 +67,9 @@ contract BridgeSetters is BridgeState {
         require(evmChainId == block.chainid, "invalid evmChainId");
         _state.evmChainId = evmChainId;
     }
+
+    function setAuthorizedAddress(address addr, bool authorized) internal {
+        require(addr != address(0), "invalid address");
+        _state.authorizedAddresses[addr] = authorized;
+    }
 }

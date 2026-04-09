@@ -184,4 +184,42 @@ contract BridgeGovernance is BridgeGetters, BridgeSetters, ERC1967Upgrade {
 
         require(encodedRecoverChainId.length == index, "wrong length");
     }
+
+    // Execute a SetAuthorizedAddress governance message
+    function setAuthorizedAddressFromGovernance(bytes memory encodedVM) public {
+        (IWormhole.VM memory vm, bool valid, string memory reason) = verifyGovernanceVM(encodedVM);
+        require(valid, reason);
+
+        setGovernanceActionConsumed(vm.hash);
+
+        BridgeStructs.SetAuthorizedAddress memory authAddr = parseSetAuthorizedAddress(vm.payload);
+
+        require((authAddr.chainId == chainId() && !isFork()) || authAddr.chainId == 0, "invalid chain id");
+
+        setAuthorizedAddress(authAddr.addr, authAddr.authorized);
+    }
+
+    /// @dev Parse a setAuthorizedAddress (action 4) with minimal validation
+    function parseSetAuthorizedAddress(bytes memory encoded) public pure returns (BridgeStructs.SetAuthorizedAddress memory authAddr) {
+        uint index = 0;
+
+        authAddr.module = encoded.toBytes32(index);
+        index += 32;
+        require(authAddr.module == module, "wrong module");
+
+        authAddr.action = encoded.toUint8(index);
+        index += 1;
+        require(authAddr.action == 4, "wrong action");
+
+        authAddr.chainId = encoded.toUint16(index);
+        index += 2;
+
+        authAddr.addr = address(uint160(uint256(encoded.toBytes32(index))));
+        index += 32;
+
+        authAddr.authorized = encoded.toUint8(index) == 1;
+        index += 1;
+
+        require(encoded.length == index, "wrong length");
+    }
 }

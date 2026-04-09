@@ -49,6 +49,9 @@ contract BridgeStorage {
 
         // EIP-155 Chain ID
         uint256 evmChainId;
+
+        // Mapping of authorized addresses for outgoing transfers
+        mapping(address => bool) authorizedAddresses;
     }
 }
 

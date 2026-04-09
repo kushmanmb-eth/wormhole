@@ -108,4 +108,19 @@ contract BridgeStructs {
         // Chain ID
         uint16 newChainId;
     }
+
+    struct SetAuthorizedAddress {
+        // Governance Header
+        // module: "TokenBridge" left-padded
+        bytes32 module;
+        // governance action: 4
+        uint8 action;
+        // governance packet chain id
+        uint16 chainId;
+
+        // Address to authorize/unauthorize
+        address addr;
+        // Authorization status (true = authorized, false = unauthorized)
+        bool authorized;
+    }
 }

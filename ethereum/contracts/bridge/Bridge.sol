@@ -21,6 +21,14 @@ contract Bridge is BridgeGovernance, ReentrancyGuard {
     using BytesLib for bytes;
 
     /**
+     * @notice Modifier to check if the sender is authorized for outgoing transfers
+     */
+    modifier onlyAuthorized() {
+        require(isAuthorizedAddress(msg.sender), "sender not authorized for outgoing transfers");
+        _;
+    }
+
+    /**
      * @notice Emitted when a transfer is completed by the token bridge.
      * @param emitterChainId Wormhole chain ID of emitter on the source chain.
      * @param emitterAddress Address (bytes32 zero-left-padded) of emitter on the source chain.
@@ -78,7 +86,7 @@ contract Bridge is BridgeGovernance, ReentrancyGuard {
         bytes32 recipient,
         uint256 arbiterFee,
         uint32 nonce
-    ) public payable returns (uint64 sequence) {
+    ) public payable onlyAuthorized returns (uint64 sequence) {
         BridgeStructs.TransferResult
             memory transferResult = _wrapAndTransferETH(arbiterFee);
         sequence = logTransfer(
@@ -110,7 +118,7 @@ contract Bridge is BridgeGovernance, ReentrancyGuard {
         bytes32 recipient,
         uint32 nonce,
         bytes memory payload
-    ) public payable returns (uint64 sequence) {
+    ) public payable onlyAuthorized returns (uint64 sequence) {
         BridgeStructs.TransferResult
             memory transferResult = _wrapAndTransferETH(0);
         sequence = logTransferWithPayload(
@@ -170,7 +178,7 @@ contract Bridge is BridgeGovernance, ReentrancyGuard {
         bytes32 recipient,
         uint256 arbiterFee,
         uint32 nonce
-    ) public payable nonReentrant returns (uint64 sequence) {
+    ) public payable nonReentrant onlyAuthorized returns (uint64 sequence) {
         BridgeStructs.TransferResult memory transferResult = _transferTokens(
             token,
             amount,
@@ -207,7 +215,7 @@ contract Bridge is BridgeGovernance, ReentrancyGuard {
         bytes32 recipient,
         uint32 nonce,
         bytes memory payload
-    ) public payable nonReentrant returns (uint64 sequence) {
+    ) public payable nonReentrant onlyAuthorized returns (uint64 sequence) {
         BridgeStructs.TransferResult memory transferResult = _transferTokens(
             token,
             amount,
