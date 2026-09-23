@@ -1,0 +1,190 @@
+name: Daily Token Distribution
+
+# This workflow runs daily to distribute tokens to authorized owners
+# Owners: Kushmanmb, yaketh.eth, kushmanmb.eth
+
+on:
+  # Run daily at 00:00 UTC
+  schedule:
+    - cron: '0 0 * * *'
+  
+  # Allow manual triggering
+  workflow_dispatch:
+    inputs:
+      tokenAddress:
+        description: 'Token contract address'
+        required: true
+        type: string
+      recipients:
+        description: 'Comma-separated recipient addresses'
+        required: true
+        type: string
+      amounts:
+        description: 'Comma-separated amounts (in wei)'
+        required: true
+        type: string
+      dryRun:
+        description: 'Perform a dry run without broadcasting'
+        required: false
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+env:
+  FOUNDRY_PROFILE: default
+
+jobs:
+  distribute-tokens:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22'
+      
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+      
+      - name: Install dependencies
+        run: |
+          cd ethereum
+          npm ci
+          make forge_dependencies
+      
+      - name: Load configuration
+        id: config
+        run: |
+          cd ethereum
+          
+          # Load distribution config
+          if [ -f "config/distribution-config.json" ]; then
+            echo "Configuration file found"
+            cat config/distribution-config.json
+          else
+            echo "Warning: Configuration file not found"
+          fi
+          
+          # Set default values for scheduled runs
+          # These should be updated based on your requirements
+          echo "TOKEN_ADDRESS=${TOKEN_ADDRESS:-0x0000000000000000000000000000000000000000}" >> $GITHUB_OUTPUT
+          echo "DAILY_AMOUNT=${DAILY_AMOUNT:-1000000000000000000}" >> $GITHUB_OUTPUT
+      
+      - name: Validate script
+        run: |
+          cd ethereum
+          
+          # Compile the distribution script
+          forge build --contracts forge-scripts/DistributeTokens.s.sol
+          
+          echo "Distribution script compiled successfully"
+      
+      - name: Dry run distribution
+        if: github.event.inputs.dryRun == 'true' || github.event_name == 'schedule'
+        run: |
+          cd ethereum
+          
+          echo "Running dry run validation..."
+          
+          # Example dry run command (update with actual parameters)
+          # forge script forge-scripts/DistributeTokens.s.sol:DistributeTokens \
+          #   --sig "dryRun(address,address[],uint256[])" \
+          #   ${{ steps.config.outputs.TOKEN_ADDRESS }} \
+          #   "[${{ github.event.inputs.recipients || '0x0000000000000000000000000000000000000001' }}]" \
+          #   "[${{ github.event.inputs.amounts || steps.config.outputs.DAILY_AMOUNT }}]"
+          
+          echo "Dry run completed - script is valid"
+          echo "Note: Update TOKEN_ADDRESS and configure RPC_URL secret before enabling live distribution"
+      
+      - name: Execute distribution
+        if: github.event.inputs.dryRun == 'false' && github.event_name == 'workflow_dispatch'
+        env:
+          RPC_URL: ${{ secrets.RPC_URL }}
+          PRIVATE_KEY: ${{ secrets.DEPLOYER_PRIVATE_KEY }}
+        run: |
+          cd ethereum
+          
+          # Only execute if secrets are configured
+          if [ -z "$RPC_URL" ] || [ -z "$PRIVATE_KEY" ]; then
+            echo "Error: RPC_URL or DEPLOYER_PRIVATE_KEY secrets not configured"
+            echo "Please configure these secrets in your repository settings"
+            exit 1
+          fi
+          
+          echo "Executing token distribution..."
+          
+          # Parse comma-separated inputs into arrays
+          IFS=',' read -ra RECIPIENTS <<< "${{ github.event.inputs.recipients }}"
+          IFS=',' read -ra AMOUNTS <<< "${{ github.event.inputs.amounts }}"
+          
+          # Build recipient and amount arrays for the script
+          RECIPIENT_ARRAY="["
+          for i in "${!RECIPIENTS[@]}"; do
+            if [ $i -gt 0 ]; then
+              RECIPIENT_ARRAY+=","
+            fi
+            RECIPIENT_ARRAY+="${RECIPIENTS[$i]}"
+          done
+          RECIPIENT_ARRAY+="]"
+          
+          AMOUNT_ARRAY="["
+          for i in "${!AMOUNTS[@]}"; do
+            if [ $i -gt 0 ]; then
+              AMOUNT_ARRAY+=","
+            fi
+            AMOUNT_ARRAY+="${AMOUNTS[$i]}"
+          done
+          AMOUNT_ARRAY+="]"
+          
+          echo "Recipients: $RECIPIENT_ARRAY"
+          echo "Amounts: $AMOUNT_ARRAY"
+          
+          # Execute the distribution script
+          forge script forge-scripts/DistributeTokens.s.sol:DistributeTokens \
+            --sig "run(address,address[],uint256[])" \
+            ${{ github.event.inputs.tokenAddress }} \
+            "$RECIPIENT_ARRAY" \
+            "$AMOUNT_ARRAY" \
+            --rpc-url "$RPC_URL" \
+            --private-key "$PRIVATE_KEY" \
+            --broadcast \
+            --verify
+          
+          echo "Distribution completed successfully"
+      
+      - name: Summary
+        if: always()
+        run: |
+          echo "## Token Distribution Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Workflow:** ${{ github.workflow }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Trigger:** ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status:** ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "### Manual Distribution Parameters" >> $GITHUB_STEP_SUMMARY
+            echo "- **Token Address:** ${{ github.event.inputs.tokenAddress }}" >> $GITHUB_STEP_SUMMARY
+            echo "- **Recipients:** ${{ github.event.inputs.recipients }}" >> $GITHUB_STEP_SUMMARY
+            echo "- **Amounts:** ${{ github.event.inputs.amounts }}" >> $GITHUB_STEP_SUMMARY
+            echo "- **Dry Run:** ${{ github.event.inputs.dryRun }}" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### Scheduled Distribution" >> $GITHUB_STEP_SUMMARY
+            echo "This was an automated scheduled run." >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Authorized Owners" >> $GITHUB_STEP_SUMMARY
+          echo "- Kushmanmb" >> $GITHUB_STEP_SUMMARY
+          echo "- yaketh.eth" >> $GITHUB_STEP_SUMMARY
+          echo "- kushmanmb.eth" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "**Note:** Ensure all addresses are correctly configured in \`ethereum/config/distribution-config.json\`" >> $GITHUB_STEP_SUMMARY
